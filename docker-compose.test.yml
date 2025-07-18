@@ -1,0 +1,37 @@
+version: "3.8"
+
+services:
+  test-db:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_USER: test_admin
+      POSTGRES_PASSWORD: test_admin123
+      POSTGRES_DB: test_consultation_db
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U test_admin -d test_consultation_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend-test:
+    build: ./backend
+    depends_on:
+      test-db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://test_admin:test_admin123@test-db:5432/test_consultation_db
+      HF_HOME: /app/model_cache
+      TESTING: "true"
+    volumes:
+      - ./backend:/app
+      - ./backend/model_cache:/app/model_cache
+    command: pytest -v --cov=app --cov-report=term --cov-report=html
+    working_dir: /app
+
+  frontend-test:
+    build: ./frontend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    command: npm test -- --coverage --watchAll=false
+    working_dir: /app

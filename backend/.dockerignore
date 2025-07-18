@@ -1,0 +1,44 @@
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+env
+pip-log.txt
+pip-delete-this-directory.txt
+.tox
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.log
+.git
+.mypy_cache
+.pytest_cache
+.hypothesis
+
+# Model cache - 용량이 큰 모델 캐시는 도커 이미지에 포함하지 않음
+model_cache/
+*.model
+*.bin
+*.pkl
+*.h5
+*.onnx
+
+# Testing
+.pytest_cache/
+test_results/
+htmlcov/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
