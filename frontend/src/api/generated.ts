@@ -34,7 +34,7 @@ import type {
   ReadConsultationsApiV1ConsultationsGetParams
 } from './model';
 
-import { customInstance } from './mutator/custom-instance';
+import { customInstance } from './mutator/api-client';
 
 
 
