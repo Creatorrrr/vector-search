@@ -1,10 +1,10 @@
 import { useState } from "react";
-import type { Consultation, ConsultationCreate, ConsultationUpdate } from "@/types/consultation";
+import type { ConsultationResponse, ConsultationCreate, ConsultationUpdate } from "@/api/model";
 import { Button } from "@/components/ui/Button";
 import Textarea from "@/components/ui/Textarea";
 
 interface ConsultationFormProps {
-  consultation?: Consultation;
+  consultation?: ConsultationResponse;
   onSubmit: (data: ConsultationCreate | ConsultationUpdate) => Promise<void>;
   onCancel: () => void;
   isEditing?: boolean;

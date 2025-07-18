@@ -5,10 +5,10 @@ import SearchBar from "@/components/SearchBar";
 import { Button } from "@/components/ui/Button";
 import { useConsultations, useSearch } from "@/hooks/useConsultations";
 import type {
-  Consultation,
+  ConsultationResponse,
   ConsultationCreate,
   ConsultationUpdate,
-} from "@/types/consultation";
+} from "@/api/model";
 import "./App.css";
 
 type ViewMode = "list" | "form" | "search";
@@ -16,7 +16,7 @@ type ViewMode = "list" | "form" | "search";
 function App() {
   const [viewMode, setViewMode] = useState<ViewMode>("list");
   const [editingConsultation, setEditingConsultation] =
-    useState<Consultation | null>(null);
+    useState<ConsultationResponse | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -56,7 +56,7 @@ function App() {
     }
   };
 
-  const handleEditConsultation = (consultation: Consultation) => {
+  const handleEditConsultation = (consultation: ConsultationResponse) => {
     setEditingConsultation(consultation);
     setViewMode("form");
   };

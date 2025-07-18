@@ -1,17 +1,17 @@
 import type {
-  Consultation,
-  SearchResult,
-  SearchResponse,
-} from "@/types/consultation";
+  ConsultationResponse,
+  ConsultationSearchResult,
+  ConsultationSearchResponse,
+} from "@/api/model";
 import { Button } from "@/components/ui/Button";
 
 interface ConsultationListProps {
-  consultations: Consultation[];
-  onEdit: (consultation: Consultation) => void;
+  consultations: ConsultationResponse[];
+  onEdit: (consultation: ConsultationResponse) => void;
   onDelete: (id: number) => void;
   loading?: boolean;
-  searchResults?: SearchResult[];
-  searchResponse?: SearchResponse;
+  searchResults?: ConsultationSearchResult[];
+  searchResponse?: ConsultationSearchResponse;
   onPageChange?: (page: number) => void;
   isSearchMode?: boolean;
 }
@@ -202,8 +202,8 @@ export const ConsultationList = ({
 
       <div className="grid gap-6">
         {displayItems.map((item) => {
-          const consultation = item as Consultation;
-          const searchResult = item as SearchResult;
+          const consultation = item as ConsultationResponse;
+          const searchResult = item as ConsultationSearchResult;
           const isSearchItem = isSearchMode && "similarity" in item;
 
           return (

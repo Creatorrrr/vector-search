@@ -1,15 +1,24 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { consultationAPI } from "../services/api";
+import { useQueryClient } from "@tanstack/react-query";
+import {
+  useHealthCheckApiV1HealthGet,
+  useReadConsultationsApiV1ConsultationsGet,
+  useCreateConsultationApiV1ConsultationsPost,
+  useUpdateConsultationApiV1ConsultationsConsultationIdPut,
+  useDeleteConsultationApiV1ConsultationsConsultationIdDelete,
+  useSearchConsultationsApiV1ConsultationsSearchPost,
+} from "../api/generated";
 import type {
-  Consultation,
+  ConsultationResponse,
   ConsultationCreate,
   ConsultationUpdate,
-  SearchResult,
-  SearchResponse,
-} from "../types/consultation";
+  ConsultationSearchRequest,
+  ConsultationSearchResponse,
+} from "../api/model";
 
-const CONSULTATION_QUERY_KEY = ["consultations"] as const;
-const SEARCH_QUERY_KEY = ["search"] as const;
+// React Query 키 타입 매칭
+type Consultation = ConsultationResponse;
+type SearchResult = ConsultationSearchResponse["results"][0];
+type SearchResponse = ConsultationSearchResponse;
 
 export const useConsultations = () => {
   const queryClient = useQueryClient();
@@ -19,53 +28,42 @@ export const useConsultations = () => {
     isLoading: loading,
     error,
     refetch,
-  } = useQuery({
-    queryKey: CONSULTATION_QUERY_KEY,
-    queryFn: consultationAPI.getAll,
-  });
+  } = useReadConsultationsApiV1ConsultationsGet();
 
-  const createMutation = useMutation({
-    mutationFn: consultationAPI.create,
-    onSuccess: (newConsultation) => {
-      queryClient.setQueryData<Consultation[]>(CONSULTATION_QUERY_KEY, (old) =>
-        old ? [newConsultation, ...old] : [newConsultation]
-      );
+  const createMutation = useCreateConsultationApiV1ConsultationsPost({
+    mutation: {
+      onSuccess: (newConsultation) => {
+        queryClient.invalidateQueries({ queryKey: ['consultations'] });
+      },
     },
   });
 
-  const updateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: number; data: ConsultationUpdate }) =>
-      consultationAPI.update(id, data),
-    onSuccess: (updatedConsultation) => {
-      queryClient.setQueryData<Consultation[]>(CONSULTATION_QUERY_KEY, (old) =>
-        old
-          ? old.map((item) =>
-              item.id === updatedConsultation.id ? updatedConsultation : item
-            )
-          : []
-      );
+  const updateMutation = useUpdateConsultationApiV1ConsultationsConsultationIdPut({
+    mutation: {
+      onSuccess: (updatedConsultation) => {
+        queryClient.invalidateQueries({ queryKey: ['consultations'] });
+      },
     },
   });
 
-  const deleteMutation = useMutation({
-    mutationFn: consultationAPI.delete,
-    onSuccess: (_, deletedId) => {
-      queryClient.setQueryData<Consultation[]>(CONSULTATION_QUERY_KEY, (old) =>
-        old ? old.filter((item) => item.id !== deletedId) : []
-      );
+  const deleteMutation = useDeleteConsultationApiV1ConsultationsConsultationIdDelete({
+    mutation: {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['consultations'] });
+      },
     },
   });
 
   const createConsultation = async (data: ConsultationCreate) => {
-    return createMutation.mutateAsync(data);
+    return createMutation.mutateAsync({ data });
   };
 
   const updateConsultation = async (id: number, data: ConsultationUpdate) => {
-    return updateMutation.mutateAsync({ id, data });
+    return updateMutation.mutateAsync({ consultationId: id, data });
   };
 
   const deleteConsultation = async (id: number) => {
-    return deleteMutation.mutateAsync(id);
+    return deleteMutation.mutateAsync({ consultationId: id });
   };
 
   return {
@@ -92,19 +90,7 @@ export const useConsultations = () => {
 };
 
 export const useSearch = () => {
-  const searchMutation = useMutation({
-    mutationFn: ({
-      query,
-      limit = 10,
-      page = 1,
-      similarity_threshold = 0.3,
-    }: {
-      query: string;
-      limit?: number;
-      page?: number;
-      similarity_threshold?: number;
-    }) => consultationAPI.search({ query, limit, page, similarity_threshold }),
-  });
+  const searchMutation = useSearchConsultationsApiV1ConsultationsSearchPost();
 
   const search = async (
     query: string,
@@ -125,10 +111,12 @@ export const useSearch = () => {
     }
 
     const results = await searchMutation.mutateAsync({
-      query,
-      limit,
-      page,
-      similarity_threshold,
+      data: {
+        query,
+        limit,
+        page,
+        similarity_threshold,
+      },
     });
     return results;
   };
